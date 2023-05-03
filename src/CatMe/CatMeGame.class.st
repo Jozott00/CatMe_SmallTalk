@@ -30,12 +30,6 @@ CatMeGame class >> newWithArgs: someArg [
 	
 ]
 
-{ #category : #'as yet unclassified' }
-CatMeGame class >> withArg: someArg [
-	self initialize.
-	myArg := someArg. 
-]
-
 { #category : #initialization }
 CatMeGame >> initializeWithArgs: someArg [
 	self initialize .
