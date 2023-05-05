@@ -5,10 +5,7 @@ Represents a Character entity
 "
 Class {
 	#name : #CmCharacter,
-	#superclass : #Object,
-	#instVars : [
-		'position'
-	],
+	#superclass : #BlElement,
 	#category : #'CatMe-Entities'
 }
 
@@ -22,11 +19,26 @@ CmCharacter class >> position: aPosition [
 ]
 
 { #category : #accessing }
-CmCharacter >> position [
-	^ position 
+CmCharacter >> moveBy: aPoint [
+
+self position: self position + (aPoint * CmBoard catMovePerTick).
+
+
 ]
 
 { #category : #accessing }
-CmCharacter >> position: aPosition [
-	position := aPosition 
+CmCharacter >> moveBy: vectorPoint within: boundaryPoint [
+"moves the character by a vector withing 0@0 and boundaryPoint"
+   | newPosition |
+    
+   newPosition := self position + vectorPoint.
+   newPosition := newPosition max: 0@0.
+	newPosition := newPosition min: (boundaryPoint - self extent).
+	
+   self position: newPosition.
+
+]
+
+{ #category : #updating }
+CmCharacter >> update [
 ]
