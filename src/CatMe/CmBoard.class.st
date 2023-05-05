@@ -5,7 +5,6 @@ Class {
 	#name : #CmBoard,
 	#superclass : #BlElement,
 	#instVars : [
-		'actionController',
 		'isRunning',
 		'cat'
 	],
@@ -18,27 +17,19 @@ CmBoard class >> boardLength [
 ]
 
 { #category : #constants }
-CmBoard class >> movementPerTick [
-^2
+CmBoard class >> catMovePerTick [
+^ 10
 ]
 
 { #category : #constants }
 CmBoard class >> tickMS [
-^ 20
-]
-
-{ #category : #accessing }
-CmBoard >> actionController [
-	^ actionController 
+^ 1000 / 60 "60 fps"
 ]
 
 { #category : #initialization }
 CmBoard >> initialize [ 
 
 super initialize.
-
-actionController := CmActionController new.
-
 self initializeElementsAndAppearance.
 self initializeInteractivity.
 ]
@@ -47,8 +38,7 @@ self initializeInteractivity.
 CmBoard >> initializeElementsAndAppearance [
 self size: self class boardLength asPoint.
 
-cat := BlElement new
-	background: (CmIcons asBlBackground: CmIcons cat).
+cat := CmCat new.
 
 self addChild: cat.
 ]
@@ -56,9 +46,6 @@ self addChild: cat.
 { #category : #initialization }
 CmBoard >> initializeInteractivity [
 
-cat addEventHandlerOn: BlKeyDownEvent do: actionController onKeyDown.
-cat addEventHandlerOn: BlKeyUpEvent do: actionController onKeyUp. 
-cat requestFocus.
 ]
 
 { #category : #'game-logic' }
