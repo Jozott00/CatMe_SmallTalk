@@ -69,8 +69,7 @@ isRunning := false
 
 { #category : #'game-logic' }
 CmBoard >> tick [
-| movement |
+"executes all updates for a tick"
 
-movement := actionController directionPoint.
-cat position: cat position + (movement * self class movementPerTick).
+cat update.
 ]
