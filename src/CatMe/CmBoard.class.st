@@ -6,10 +6,26 @@ Class {
 	#superclass : #BlElement,
 	#instVars : [
 		'actionController',
+		'isRunning',
 		'cat'
 	],
 	#category : #CatMe
 }
+
+{ #category : #constants }
+CmBoard class >> boardLength [
+^500
+]
+
+{ #category : #constants }
+CmBoard class >> movementPerTick [
+^2
+]
+
+{ #category : #constants }
+CmBoard class >> tickMS [
+^ 20
+]
 
 { #category : #accessing }
 CmBoard >> actionController [
@@ -29,6 +45,7 @@ self initializeInteractivity.
 
 { #category : #initialization }
 CmBoard >> initializeElementsAndAppearance [
+self size: self class boardLength asPoint.
 
 cat := BlElement new
 	background: (CmIcons asBlBackground: CmIcons cat).
@@ -42,4 +59,31 @@ CmBoard >> initializeInteractivity [
 cat addEventHandlerOn: BlKeyDownEvent do: actionController onKeyDown.
 cat addEventHandlerOn: BlKeyUpEvent do: actionController onKeyUp. 
 cat requestFocus.
+]
+
+{ #category : #'game-logic' }
+CmBoard >> start [
+
+isRunning := true.
+[ 
+	[ isRunning  ] whileTrue: [ 
+		self tick.
+		(Delay forMilliseconds: self class tickMS) wait.
+	 ].
+	
+	self inform: 'Game round stopped'
+] fork.
+]
+
+{ #category : #'game-logic' }
+CmBoard >> stop [
+isRunning := false
+]
+
+{ #category : #'game-logic' }
+CmBoard >> tick [
+| movement |
+
+movement := actionController directionPoint.
+cat position: cat position + (movement * self class movementPerTick).
 ]

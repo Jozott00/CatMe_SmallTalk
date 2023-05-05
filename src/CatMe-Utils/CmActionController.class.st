@@ -33,8 +33,11 @@ CmActionController >> directionPoint [
     "Check if the down arrow key is pressed"
     (keys includes: KeyboardKey down ) ifTrue: [ y := y + 1 ].
 
-    "Return a Point representing the direction vector"
-    ^ x@y
+    "Return a Point representing the normalized direction vector"
+	 ((x@y) = (0@0)) ifFalse: [ ^ (x@y) normalized ].
+    ^ x@y.
+
+
 ]
 
 { #category : #initialization }
