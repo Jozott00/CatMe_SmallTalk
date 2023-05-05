@@ -11,6 +11,32 @@ Class {
 	#category : #'CatMe-Utils'
 }
 
+{ #category : #action }
+CmActionController >> directionPoint [
+"returns a vector as `Point` dependening on what arrowkeys where pressed"
+    | x y keys |
+    x := 0.
+    y := 0.
+	
+	 "copy keys to get consistent state"
+	 keys := pressedKeys copy.
+	
+    "Check if the left arrow key is pressed"
+    (keys includes: KeyboardKey left ) ifTrue: [ x := x - 1 ].
+
+    "Check if the right arrow key is pressed"
+    (keys includes: KeyboardKey right ) ifTrue: [ x := x + 1 ].
+
+    "Check if the up arrow key is pressed"
+    (keys includes: KeyboardKey up ) ifTrue: [ y := y - 1 ].
+
+    "Check if the down arrow key is pressed"
+    (keys includes: KeyboardKey down ) ifTrue: [ y := y + 1 ].
+
+    "Return a Point representing the direction vector"
+    ^ x@y
+]
+
 { #category : #initialization }
 CmActionController >> initialize [
 pressedKeys := Set new.
@@ -24,7 +50,6 @@ CmActionController >> onKeyDown [
 
 { #category : #'key-updates' }
 CmActionController >> onKeyDown: aKeyDownEvent [
-self inform: 'Key down: ', aKeyDownEvent asString.
 
 pressedKeys add: aKeyDownEvent key.
 ]
@@ -36,9 +61,8 @@ CmActionController >> onKeyUp [
 
 { #category : #'key-updates' }
 CmActionController >> onKeyUp: aKeyUpEvent [
-self inform: 'Key down: ', aKeyUpEvent asString.
 
-pressedKeys add: aKeyUpEvent key.
+pressedKeys remove: aKeyUpEvent key.
 ]
 
 { #category : #accessing }

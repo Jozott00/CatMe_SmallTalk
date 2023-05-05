@@ -11,6 +11,11 @@ Class {
 	#category : #CatMe
 }
 
+{ #category : #accessing }
+CmBoard >> actionController [
+	^ actionController 
+]
+
 { #category : #initialization }
 CmBoard >> initialize [ 
 
