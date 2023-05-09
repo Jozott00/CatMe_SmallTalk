@@ -10,7 +10,8 @@ Class {
 		'tunnels',
 		'mice',
 		'goalTunnel',
-		'dijkstraGraph'
+		'dijkstraGraph',
+		'fpsElement'
 	],
 	#category : #CatMe
 }
@@ -36,6 +37,19 @@ mice := Set new.
 self initializeElementsAndAppearance.
 self initializeInteractivity.
 self initializeMouseRunningPaths.
+
+self initializeDebugInfo.
+]
+
+{ #category : #initialization }
+CmBoard >> initializeDebugInfo [
+
+CmSettings debugFPS ifTrue: [ 
+		fpsElement := BlTextElement new
+			text: 'FPS: ...' asRopedText;
+			position: 10@10.
+		self addChild: fpsElement.
+	 ]
 ]
 
 { #category : #initialization }
@@ -93,7 +107,6 @@ CmBoard >> initializeMouseRunningPaths [
 		             (exits select: [ :el | el ~= first ]) collect: [ :second |
 			             | distance |
 			             distance := first pos distanceTo: second pos.
-							Transcript show: first pos asString; cr.
 			             dist ifNotNil: [ distance := 0 ].
 			             edges add: {
 					             first.
@@ -146,11 +159,37 @@ CmBoard >> start [
 
 isRunning := true.
 [ 
+	| frameCount lastFPSCalculationTime atLimit|
 	(Delay forMilliseconds: CmSettings startupDelay) wait.
 	
+	frameCount := 0.
+	lastFPSCalculationTime := Time millisecondClockValue.
+	atLimit := false.
+	
 	[ isRunning  ] whileTrue: [ 
+		| startTime currentTime elapsedTime |
+		startTime := Time millisecondClockValue.
+	
 		self tick.
-		(Delay forMilliseconds: CmSettings tickDelayMS) wait.
+		
+		frameCount := frameCount + 1.
+		currentTime := Time millisecondClockValue.
+		elapsedTime := currentTime - startTime.
+		
+		"Check if a second has passed since the last FPS calculation"
+		(currentTime - lastFPSCalculationTime >= 500) ifTrue: [ 
+			self updateFPS: frameCount * 2 atLimit: atLimit.
+			frameCount := 0.
+			lastFPSCalculationTime := currentTime. 
+			atLimit := false.
+			].
+			
+		"Check elapsedTime was greater than wanted delay"
+		(CmSettings tickDelayMS < elapsedTime ) ifTrue: [ 
+			atLimit := true. 
+			].
+			
+		(Delay forMilliseconds: (CmSettings tickDelayMS - elapsedTime max: 0)) wait.
 	].
 	
 	self inform: 'Game round stopped'.
@@ -176,4 +215,14 @@ mice do: [ :mouse |
 { #category : #accessing }
 CmBoard >> tunnels [
 ^ tunnels
+]
+
+{ #category : #accessing }
+CmBoard >> updateFPS: aNumber atLimit: aBoolean [
+
+fpsElement ifNil: [ ^ nil ].
+
+fpsElement text: ('FPS: ', aNumber asString) asRopedText.
+
+aBoolean ifTrue: [ fpsElement background: Color red. ] ifFalse: [ fpsElement background: Color transparent ]
 ]

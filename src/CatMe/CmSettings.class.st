@@ -13,6 +13,11 @@ CmSettings class >> catMovePerTick [
 ]
 
 { #category : #debug }
+CmSettings class >> debugFPS [
+^ true
+]
+
+{ #category : #debug }
 CmSettings class >> debugGoalTunnels [
 ^true
 ]
@@ -57,7 +62,7 @@ CmSettings class >> miceMaxSpeed [
 
 { #category : #'setting - mice' }
 CmSettings class >> miceNumber [
-^ 1
+^ 50
 ]
 
 { #category : #'setting - mice' }
