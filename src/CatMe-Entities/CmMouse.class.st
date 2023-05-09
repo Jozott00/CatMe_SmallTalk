@@ -3,7 +3,10 @@ Class {
 	#superclass : #CmCharacter,
 	#instVars : [
 		'inTunnel',
+		'atStart',
+		'atGoal',
 		'targetExit',
+		'delayCounter',
 		'nextTargetClb',
 		'debugTextElem'
 	],
@@ -11,14 +14,41 @@ Class {
 }
 
 { #category : #'game-logic' }
+CmMouse >> delayDecrement [
+delayCounter := delayCounter - 1.
+]
+
+{ #category : #'game-logic' }
 CmMouse >> hides [
 ^ inTunnel
+]
+
+{ #category : #accessing }
+CmMouse >> inTunnel: aBoolean [
+| invisibleOpacity |
+inTunnel := aBoolean.
+
+invisibleOpacity := 0.
+CmSettings miceTrace ifTrue: [ invisibleOpacity := 0.3 ].
+
+aBoolean ifFalse: [ self opacity: 1 ] ifTrue: [ self opacity: invisibleOpacity ]
+]
+
+{ #category : #accessing }
+CmMouse >> initialExit: anExit [
+self pos: anExit pos.
+targetExit := anExit 
 ]
 
 { #category : #initialization }
 CmMouse >> initialize [ 
 
 super initialize.
+atStart := true.
+atGoal := false.
+delayCounter := CmSettings miceMaxDelayCount atRandom.
+self speed: CmSettings miceMaxSpeed atRandom * CmSettings mouseMovePerTick.
+self inTunnel: true.
 self initializeAppearance 
 ]
 
@@ -28,9 +58,6 @@ CmMouse >> initializeAppearance [
 
 icon := CmIcons mouse.
 self background: (CmIcons asBlBackground: icon).
-self pos: CmUtils randomBoardPosition.
-
-CmSettings hideMice ifTrue: [ self opacity: 0 ].
 
 CmSettings debugMice ifTrue: [ 
 	debugTextElem := BlTextElement text: 'hello ' asRopedText.
@@ -44,26 +71,40 @@ CmMouse >> nextTargetClb: aBlockClosure [
 nextTargetClb := aBlockClosure.
 ]
 
-{ #category : #accessing }
-CmMouse >> targetExit: anExit [
-targetExit := anExit 
-]
-
 { #category : #updating }
 CmMouse >> update [
 | reachedTarget |
 
 super update.
 
+"decrement delay"
+delayCounter > 0 ifTrue: [ ^ self delayDecrement ].
+
+atGoal ifTrue: [ ^nil ].
+
+"move in target direction"
 reachedTarget := self moveTo: (targetExit position) 
 	within: CmBoard boardLength asPoint 
-	velocity: CmSettings mouseMovePerTick.
+	velocity: speed.
 
 
-reachedTarget ifTrue: [ 
-	"get new target"
-	targetExit := nextTargetClb value: targetExit.	
- ].
+"if target is reached and target is not goal, get next target"
+reachedTarget ifTrue: [ 	
+		targetExit isGoal ifTrue: [ 
+			atGoal := true.
+			self inTunnel: true.
+		] ifFalse: [ 
+		
+		atStart ifTrue: [ 
+			self inTunnel: true.
+			atStart := false.	
+		] ifFalse: [ 
+			self inTunnel: inTunnel not.
+		].
+		"get new target"
+		targetExit := nextTargetClb value: targetExit.
+	] 
+].
 
 "debug mice"
 CmSettings debugMice ifTrue: [ self updateDebugInfo. ].

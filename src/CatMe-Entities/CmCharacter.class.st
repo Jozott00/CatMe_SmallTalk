@@ -7,7 +7,8 @@ Class {
 	#name : #CmCharacter,
 	#superclass : #BlElement,
 	#instVars : [
-		'pos'
+		'pos',
+		'speed'
 	],
 	#category : #'CatMe-Entities'
 }
@@ -37,6 +38,9 @@ CmCharacter >> moveBy: vectorPoint within: boundaryPoint [
    newPosition := self pos + vectorPoint.
    newPosition := newPosition max: 0@0.
 	newPosition := newPosition min: (boundaryPoint - self extent).
+	
+	"don't update position if not necassary, since this causes rendering"
+	(newPosition = (0@0)) ifTrue: [ ^ nil ].
 	
    self pos: newPosition.
 
@@ -71,6 +75,16 @@ CmCharacter >> pos [
 CmCharacter >> pos: aPoint [
 self position: aPoint.
 pos := aPoint.
+]
+
+{ #category : #accessing }
+CmCharacter >> speed [
+^ speed.
+]
+
+{ #category : #accessing }
+CmCharacter >> speed: aNumber [
+speed := aNumber
 ]
 
 { #category : #updating }

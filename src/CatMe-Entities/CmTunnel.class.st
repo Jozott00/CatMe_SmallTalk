@@ -15,17 +15,21 @@ CmTunnel >> exits [
 
 { #category : #initialization }
 CmTunnel >> initialize [
+| numberOfExits |
 
 isGoal := false.
 exits := Set new.
 
-1 to: 3 do: [ :nr |
+
+numberOfExits := 2 + (Random new nextInteger: ((CmSettings maxTunnelEntries) - 2)).
+1 to: numberOfExits do: [ :nr |
 	| e |
 	e := CmTunnelExit new.
 	exits add: e. 
 	].
 
 self updateAppearance.
+
 ]
 
 { #category : #accessing }
@@ -36,6 +40,9 @@ CmTunnel >> isGoal [
 { #category : #accessing }
 CmTunnel >> isGoal: aBoolean [
 isGoal := aBoolean.
+
+exits do: [ :e | e isGoal: aBoolean ].
+
 self updateAppearance. 
 ]
 

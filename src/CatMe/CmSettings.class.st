@@ -7,6 +7,11 @@ Class {
 	#category : #CatMe
 }
 
+{ #category : #'setting - cat' }
+CmSettings class >> catMovePerTick [
+^ 10.
+]
+
 { #category : #debug }
 CmSettings class >> debugGoalTunnels [
 ^true
@@ -24,22 +29,58 @@ CmSettings class >> debugTunnels [
 ^true
 ]
 
-{ #category : #hide }
-CmSettings class >> hideMice [
-^false
+{ #category : #'game-settings' }
+CmSettings class >> gameFPS [
+^ 60
 ]
 
 { #category : #'game-settings' }
+CmSettings class >> maxTunnelEntries [
+^ 3
+]
+
+{ #category : #'setting - mice' }
+CmSettings class >> miceMaxDelayCount [
+^ self miceMaxDelayMS / self tickDelayMS
+]
+
+{ #category : #'setting - mice' }
+CmSettings class >> miceMaxDelayMS [
+"sets the mice delay in MS... is used by miceMaxDelayCount"
+^ 1000 * 10
+]
+
+{ #category : #'setting - mice' }
+CmSettings class >> miceMaxSpeed [
+^ 3
+]
+
+{ #category : #'setting - mice' }
 CmSettings class >> miceNumber [
 ^ 1
 ]
 
-{ #category : #'game-settings' }
+{ #category : #'setting - mice' }
+CmSettings class >> miceTrace [
+^false
+]
+
+{ #category : #'setting - mice' }
 CmSettings class >> mouseMovePerTick [
-^ 10
+^ 1
 ]
 
 { #category : #'game-settings' }
 CmSettings class >> startupDelay [
 ^ 200
+]
+
+{ #category : #'game-settings' }
+CmSettings class >> tickDelayMS [
+^ 1000 / self gameFPS 
+]
+
+{ #category : #'game-settings' }
+CmSettings class >> tunnelNumber [
+^10
 ]

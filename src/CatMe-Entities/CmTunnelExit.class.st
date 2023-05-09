@@ -1,6 +1,9 @@
 Class {
 	#name : #CmTunnelExit,
 	#superclass : #CmCharacter,
+	#instVars : [
+		'isGoal'
+	],
 	#category : #'CatMe-Entities'
 }
 
@@ -14,4 +17,15 @@ CmTunnelExit >> initialize [
 	self size: len@len.
 	
 	self pos: CmUtils randomBoardPosition.
+	self isGoal: false.
+]
+
+{ #category : #accessing }
+CmTunnelExit >> isGoal [
+^isGoal
+]
+
+{ #category : #accessing }
+CmTunnelExit >> isGoal: aBoolean [
+isGoal := aBoolean
 ]

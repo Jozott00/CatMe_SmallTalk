@@ -20,16 +20,6 @@ CmBoard class >> boardLength [
 ^1000
 ]
 
-{ #category : #constants }
-CmBoard class >> catMovePerTick [
-^ 10
-]
-
-{ #category : #constants }
-CmBoard class >> tickMS [
-^ 1000 / 60 * 10 "60 fps"
-]
-
 { #category : #accessing }
 CmBoard >> dijkstra [
 ^ dijkstraGraph.
@@ -53,7 +43,7 @@ CmBoard >> initializeElementsAndAppearance [
 self size: self class boardLength asPoint.
 
 "generate tunnels"
-1 to: 3 do: [ :nr |
+1 to: CmSettings tunnelNumber do: [ :nr |
 		| tunnel |
 		tunnel := CmTunnel new.
 		self addChildren: tunnel exits asArray.
@@ -71,7 +61,7 @@ goalTunnel isGoal: true.
 		initTunnel := (tunnels select: [ :t | t ~= goalTunnel ]) asArray atRandom.
 		initExit := initTunnel exits asArray atRandom.
 		mouse pos: initExit pos.
-		mouse targetExit: initExit.
+		mouse initialExit: initExit.
 		mouse nextTargetClb: [ :current | self nextExit: current ].
 		
 		self addChild: mouse.
@@ -160,7 +150,7 @@ isRunning := true.
 	
 	[ isRunning  ] whileTrue: [ 
 		self tick.
-		(Delay forMilliseconds: self class tickMS) wait.
+		(Delay forMilliseconds: CmSettings tickDelayMS) wait.
 	].
 	
 	self inform: 'Game round stopped'.

@@ -17,6 +17,7 @@ CmCat >> initialize [
 
 super initialize.
 
+speed := CmSettings catMovePerTick.
 actionController := CmActionController new.
 self initializeAppearance.
 self initializeInteractivity.
@@ -46,6 +47,6 @@ CmCat >> update [
 
 super update.
 
-movement := actionController directionPoint * CmBoard catMovePerTick.
+movement := actionController directionPoint * self speed.
 self moveBy: movement within: CmBoard boardLength asPoint.
 ]
