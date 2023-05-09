@@ -1,6 +1,6 @@
 Class {
 	#name : #CmTunnelExit,
-	#superclass : #BlElement,
+	#superclass : #CmCharacter,
 	#category : #'CatMe-Entities'
 }
 
@@ -13,5 +13,5 @@ CmTunnelExit >> initialize [
 	len := 50.
 	self size: len@len.
 	
-	self position: CmUtils randomBoardPosition.
+	self pos: CmUtils randomBoardPosition.
 ]

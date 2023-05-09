@@ -17,7 +17,7 @@ Class {
 
 { #category : #constants }
 CmBoard class >> boardLength [
-^500
+^1000
 ]
 
 { #category : #constants }
@@ -27,7 +27,12 @@ CmBoard class >> catMovePerTick [
 
 { #category : #constants }
 CmBoard class >> tickMS [
-^ 1000 / 30 "60 fps"
+^ 1000 / 60 * 10 "60 fps"
+]
+
+{ #category : #accessing }
+CmBoard >> dijkstra [
+^ dijkstraGraph.
 ]
 
 { #category : #initialization }
@@ -65,8 +70,9 @@ goalTunnel isGoal: true.
 		
 		initTunnel := (tunnels select: [ :t | t ~= goalTunnel ]) asArray atRandom.
 		initExit := initTunnel exits asArray atRandom.
-		"mouse position: initExit position."
+		mouse pos: initExit pos.
 		mouse targetExit: initExit.
+		mouse nextTargetClb: [ :current | self nextExit: current ].
 		
 		self addChild: mouse.
 		mice add: mouse.
@@ -96,7 +102,8 @@ CmBoard >> initializeMouseRunningPaths [
 	             exits do: [ :first |
 		             (exits select: [ :el | el ~= first ]) collect: [ :second |
 			             | distance |
-			             distance := first position distanceTo: second position.
+			             distance := first pos distanceTo: second pos.
+							Transcript show: first pos asString; cr.
 			             dist ifNotNil: [ distance := 0 ].
 			             edges add: {
 					             first.
@@ -134,9 +141,14 @@ CmBoard >> initializeMouseRunningPaths [
 CmBoard >> nextExit: anExit [
 "returns a mouse should run to"
 "anExit is the current exit of the mouse"
+| path |
 
 dijkstraGraph end: anExit.
-^ dijkstraGraph reconstructPath first.
+
+path := dijkstraGraph reconstructPath.
+ 
+"since the first and the last one are from and to, we want the pre last one"
+ ^ path size = 1 ifTrue: [ path last ] ifFalse: [ path at: path size - 1 ]
 ]
 
 { #category : #'game-logic' }
@@ -144,14 +156,14 @@ CmBoard >> start [
 
 isRunning := true.
 [ 
-	"(Delay forMilliseconds: 2000) wait."
+	(Delay forMilliseconds: CmSettings startupDelay) wait.
 	
 	[ isRunning  ] whileTrue: [ 
 		self tick.
 		(Delay forMilliseconds: self class tickMS) wait.
-	 ].
+	].
 	
-	self inform: 'Game round stopped'
+	self inform: 'Game round stopped'.
 ] fork.
 ]
 

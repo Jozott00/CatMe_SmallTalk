@@ -15,7 +15,7 @@ CmSettings class >> debugGoalTunnels [
 { #category : #debug }
 CmSettings class >> debugMice [
 "if true, position and target of mice are displayed"
-^ true
+^ false
 ]
 
 { #category : #debug }
@@ -31,10 +31,15 @@ CmSettings class >> hideMice [
 
 { #category : #'game-settings' }
 CmSettings class >> miceNumber [
-^ 20
+^ 1
 ]
 
 { #category : #'game-settings' }
 CmSettings class >> mouseMovePerTick [
-^ 1
+^ 10
+]
+
+{ #category : #'game-settings' }
+CmSettings class >> startupDelay [
+^ 200
 ]

@@ -44,15 +44,22 @@ CmCharacter >> moveBy: vectorPoint within: boundaryPoint [
 
 { #category : #accessing }
 CmCharacter >> moveTo: aPoint within: boundaryPoint velocity: aNumber [
-| direction |
+"returns true if aPoint was reached"
+
+| direction finalMovement reached |
 
 "calculate direction"
+direction := aPoint - self pos.
+finalMovement := 0@0.
+(direction = (0@0)) ifFalse: [ finalMovement := direction normalized ].
+finalMovement := finalMovement * aNumber.
 
-"direction := 1@1."
-direction := aPoint - self position.
-(direction = (0@0)) ifFalse: [ direction := direction normalized ].
+reached := direction abs <= finalMovement abs.
+reached ifTrue: [ finalMovement := direction ].
 
-self moveBy: direction * aNumber within: boundaryPoint.
+self moveBy: finalMovement within: boundaryPoint.
+
+^ reached.
 ]
 
 { #category : #accessing }
