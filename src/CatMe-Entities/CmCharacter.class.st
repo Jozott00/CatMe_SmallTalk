@@ -6,6 +6,9 @@ Represents a Character entity
 Class {
 	#name : #CmCharacter,
 	#superclass : #BlElement,
+	#instVars : [
+		'pos'
+	],
 	#category : #'CatMe-Entities'
 }
 
@@ -21,7 +24,7 @@ CmCharacter class >> position: aPosition [
 { #category : #accessing }
 CmCharacter >> moveBy: aPoint [
 
-self position: self position + (aPoint * CmBoard catMovePerTick).
+self pos: self pos + (aPoint * CmBoard catMovePerTick).
 
 
 ]
@@ -31,12 +34,36 @@ CmCharacter >> moveBy: vectorPoint within: boundaryPoint [
 "moves the character by a vector withing 0@0 and boundaryPoint"
    | newPosition |
     
-   newPosition := self position + vectorPoint.
+   newPosition := self pos + vectorPoint.
    newPosition := newPosition max: 0@0.
 	newPosition := newPosition min: (boundaryPoint - self extent).
 	
-   self position: newPosition.
+   self pos: newPosition.
 
+]
+
+{ #category : #accessing }
+CmCharacter >> moveTo: aPoint within: boundaryPoint velocity: aNumber [
+| direction |
+
+"calculate direction"
+
+"direction := 1@1."
+direction := aPoint - self position.
+(direction = (0@0)) ifFalse: [ direction := direction normalized ].
+
+self moveBy: direction * aNumber within: boundaryPoint.
+]
+
+{ #category : #accessing }
+CmCharacter >> pos [
+^ pos
+]
+
+{ #category : #accessing }
+CmCharacter >> pos: aPoint [
+self position: aPoint.
+pos := aPoint.
 ]
 
 { #category : #updating }

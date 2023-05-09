@@ -27,7 +27,8 @@ CmCat >> initializeAppearance [
 | icon |
 
 icon := CmIcons cat.
-self background: (CmIcons asBlBackground: icon)
+self background: (CmIcons asBlBackground: icon).
+self pos: CmUtils randomBoardPosition.
 
 ]
 

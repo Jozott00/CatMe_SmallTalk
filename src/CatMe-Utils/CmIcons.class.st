@@ -32,3 +32,16 @@ path := repository location / 'resources' / aString.
 form := ImageReadWriter formFromFileNamed: path.
 ^form
 ]
+
+{ #category : #icons }
+CmIcons class >> mouse [
+
+^ self loadIcon: 'mouse.png'
+
+]
+
+{ #category : #icons }
+CmIcons class >> tunnel [
+
+^ self loadIcon: 'tunnel.png'
+]
