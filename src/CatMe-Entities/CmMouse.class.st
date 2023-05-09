@@ -3,7 +3,6 @@ Class {
 	#superclass : #CmCharacter,
 	#instVars : [
 		'inTunnel',
-		'atStart',
 		'atGoal',
 		'targetExit',
 		'delayCounter',
@@ -12,6 +11,11 @@ Class {
 	],
 	#category : #'CatMe-Entities'
 }
+
+{ #category : #accessing }
+CmMouse >> atGoal [
+^ atGoal
+]
 
 { #category : #'game-logic' }
 CmMouse >> delayDecrement [
@@ -44,7 +48,6 @@ targetExit := anExit
 CmMouse >> initialize [ 
 
 super initialize.
-atStart := true.
 atGoal := false.
 delayCounter := CmSettings miceMaxDelayCount atRandom.
 self speed: CmSettings miceMaxSpeed atRandom * CmSettings mouseMovePerTick.
@@ -90,19 +93,17 @@ reachedTarget := self moveTo: (targetExit position)
 
 "if target is reached and target is not goal, get next target"
 reachedTarget ifTrue: [ 	
+		| oldTarget |
 		targetExit isGoal ifTrue: [ 
 			atGoal := true.
 			self inTunnel: true.
 		] ifFalse: [ 
 		
-		atStart ifTrue: [ 
-			self inTunnel: true.
-			atStart := false.	
-		] ifFalse: [ 
-			self inTunnel: inTunnel not.
-		].
 		"get new target"
+		oldTarget := targetExit.
 		targetExit := nextTargetClb value: targetExit.
+		
+		self inTunnel: ((oldTarget tunnel) = (targetExit tunnel)).
 	] 
 ].
 

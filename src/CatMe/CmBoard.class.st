@@ -11,7 +11,9 @@ Class {
 		'mice',
 		'goalTunnel',
 		'dijkstraGraph',
-		'fpsElement'
+		'tickCount',
+		'fpsElement',
+		'scoreboardElem'
 	],
 	#category : #CatMe
 }
@@ -31,6 +33,7 @@ CmBoard >> initialize [
 
 super initialize.
 
+tickCount := 0.
 tunnels := Set new.
 mice := Set new.
 
@@ -47,7 +50,8 @@ CmBoard >> initializeDebugInfo [
 CmSettings debugFPS ifTrue: [ 
 		fpsElement := BlTextElement new
 			text: 'FPS: ...' asRopedText;
-			position: 10@10.
+			position: 10@10;
+			defaultFontSize: 20.
 		self addChild: fpsElement.
 	 ]
 ]
@@ -84,8 +88,12 @@ goalTunnel isGoal: true.
 
 "generate cat"
 cat := CmCat new.
-
 self addChild: cat.
+
+"scoreboard"
+scoreboardElem := CmScoreBoard new.
+self addChild: scoreboardElem.
+
 ]
 
 { #category : #initialization }
@@ -107,6 +115,7 @@ CmBoard >> initializeMouseRunningPaths [
 		             (exits select: [ :el | el ~= first ]) collect: [ :second |
 			             | distance |
 			             distance := first pos distanceTo: second pos.
+							 distance := CmUtils weightForEdgeFrom: first pos to: second pos catPosition: cat pos.
 			             dist ifNotNil: [ distance := 0 ].
 			             edges add: {
 					             first.
@@ -138,6 +147,21 @@ CmBoard >> initializeMouseRunningPaths [
 
 	"run calculation"
 	dijkstraGraph runFrom: goalTunnel exits asArray anyOne.
+]
+
+{ #category : #testing }
+CmBoard >> isFinishState [
+| result |
+
+result := true.
+^ mice allSatisfy: [ :mouse |
+	mouse atGoal
+	].
+]
+
+{ #category : #accessing }
+CmBoard >> miceAtGoal [
+^ mice sum: [ :mouse | mouse atGoal ifTrue: [ 1 ] ifFalse: [ 0 ] ]
 ]
 
 { #category : #'mouse-path' }
@@ -173,6 +197,7 @@ isRunning := true.
 		self tick.
 		
 		frameCount := frameCount + 1.
+		tickCount := tickCount + 1.
 		currentTime := Time millisecondClockValue.
 		elapsedTime := currentTime - startTime.
 		
@@ -191,7 +216,8 @@ isRunning := true.
 			
 		(Delay forMilliseconds: (CmSettings tickDelayMS - elapsedTime max: 0)) wait.
 	].
-	
+
+	self updateScoreboard.
 	self inform: 'Game round stopped'.
 ] fork.
 ]
@@ -205,11 +231,22 @@ isRunning := false
 CmBoard >> tick [
 "executes all updates for a tick"
 
+(tickCount % CmSettings findPathEveryXTicks = 0) ifTrue: [ 
+	self initializeMouseRunningPaths. 
+	].
+
 cat update.
 
 mice do: [ :mouse |
 		mouse update.
 	].
+
+
+(tickCount % CmSettings findPathEveryXTicks = 0) ifTrue: [ 
+	self updateScoreboard. 
+	].
+
+self isFinishState ifTrue: [ self stop ]
 ]
 
 { #category : #accessing }
@@ -219,10 +256,22 @@ CmBoard >> tunnels [
 
 { #category : #accessing }
 CmBoard >> updateFPS: aNumber atLimit: aBoolean [
-
+| border |
 fpsElement ifNil: [ ^ nil ].
 
 fpsElement text: ('FPS: ', aNumber asString) asRopedText.
 
-aBoolean ifTrue: [ fpsElement background: Color red. ] ifFalse: [ fpsElement background: Color transparent ]
+border := BlBorder builder paint: Color red; width: 2; build.
+aBoolean ifTrue: [ fpsElement border: border. ] ifFalse: [ fpsElement border: nil ]
+]
+
+{ #category : #'update cycle' }
+CmBoard >> updateScoreboard [
+| miceAtGoal |
+
+miceAtGoal := self miceAtGoal.
+scoreboardElem miceAtGoal: miceAtGoal.
+scoreboardElem miceLeft: CmSettings miceNumber - miceAtGoal.
+
+
 ]

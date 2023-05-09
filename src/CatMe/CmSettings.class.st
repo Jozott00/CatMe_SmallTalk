@@ -19,7 +19,7 @@ CmSettings class >> debugFPS [
 
 { #category : #debug }
 CmSettings class >> debugGoalTunnels [
-^true
+^ false
 ]
 
 { #category : #debug }
@@ -31,7 +31,12 @@ CmSettings class >> debugMice [
 { #category : #debug }
 CmSettings class >> debugTunnels [
 "display tunnel ids"
-^true
+^ false
+]
+
+{ #category : #'game-settings' }
+CmSettings class >> findPathEveryXTicks [
+^ 20
 ]
 
 { #category : #'game-settings' }
