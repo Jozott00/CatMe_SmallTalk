@@ -4,7 +4,7 @@ Class {
 	#category : #'CatMe-Utils'
 }
 
-{ #category : #'graph - calculation' }
+{ #category : #'as yet unclassified' }
 CmUtils class >> distanceFromPoint: point toLineSegmentFrom: lineStart to: lineEnd [
     | lineVector pointVector projection scalar t closestPoint dotProd |
 

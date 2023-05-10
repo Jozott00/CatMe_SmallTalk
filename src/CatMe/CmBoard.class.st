@@ -10,6 +10,8 @@ Class {
 		'tunnels',
 		'mice',
 		'goalTunnel',
+		'pathFinder',
+		'lastKnownCatPos',
 		'dijkstraGraph',
 		'tickCount',
 		'fpsElement',
@@ -23,6 +25,12 @@ CmBoard class >> boardLength [
 ^1000
 ]
 
+{ #category : #accessing }
+CmBoard >> catSeen [
+
+pathFinder updateCatPosition: cat pos.
+]
+
 { #category : #'update cycle' }
 CmBoard >> checkMiceCatches [
 
@@ -30,11 +38,6 @@ mice 	select: [ :mouse | mouse hides not & mouse inGame & (cat collidesWith: mou
 		thenDo: [ :mouse |
 			mouse caughtBy: cat.
 	 	]
-]
-
-{ #category : #accessing }
-CmBoard >> dijkstra [
-^ dijkstraGraph.
 ]
 
 { #category : #initialization }
@@ -47,8 +50,8 @@ tunnels := Set new.
 mice := Set new.
 
 self initializeElementsAndAppearance.
-self initializeInteractivity.
-self initializeMouseRunningPaths.
+self initializePathfinder.
+"self initializeMouseRunningPaths."
 
 self initializeDebugInfo.
 ]
@@ -89,7 +92,19 @@ goalTunnel isGoal: true.
 		initExit := initTunnel exits asArray atRandom.
 		mouse pos: initExit pos.
 		mouse initialExit: initExit.
-		mouse nextTargetClb: [ :current | self nextExit: current ].
+		mouse nextTargetClb: [ :current | 
+			| mouseGoesHiding nextExit |
+			
+			nextExit := pathFinder nextAfter: current.
+			
+			"if mouse is currently not hiding in tunnel and is going into tunnel"
+			mouseGoesHiding := mouse hides not & (nextExit tunnel = current tunnel).
+			 
+			"if the mouse goes from surface to underground, spread cat seen"
+			mouseGoesHiding ifTrue: [pathFinder updateCatPosition: cat pos.self catSeen].
+			
+			nextExit  
+			].
 		
 		self addChild: mouse.
 		mice add: mouse.
@@ -106,56 +121,9 @@ self addChild: scoreboardElem.
 ]
 
 { #category : #initialization }
-CmBoard >> initializeInteractivity [
+CmBoard >> initializePathfinder [
 
-]
-
-{ #category : #initialization }
-CmBoard >> initializeMouseRunningPaths [
-
-	| nodes edges edgeAdder |
-	nodes := Set new.
-	edges := Set new.
-
-	"closure that adds all combinations of given exits as edges"
-	"if dist is not null, dist overrides the actual distance"
-	edgeAdder := [ :exits :dist |
-	             exits do: [ :first |
-		             (exits select: [ :el | el ~= first ]) collect: [ :second |
-			             | distance |
-			             distance := first pos distanceTo: second pos.
-							 distance := CmUtils weightForEdgeFrom: first pos to: second pos catPosition: cat pos.
-			             dist ifNotNil: [ distance := 0 ].
-			             edges add: {
-					             first.
-					             second.
-					             distance }.
-			             edges add: {
-					             second.
-					             first.
-					             distance } ] ] ].
-
-	"add all exit combinations within tunnel and set the weight to 0"
-	tunnels do: [ :t |
-		| exits |
-		exits := t exits.
-		nodes addAll: exits.
-		edgeAdder value: exits value: 0 ].
-
-	"add the combindations of all exits to the graph with the distance as weight"
-	edgeAdder value: nodes value: nil.
-
-	"setup dijkstra graph"
-	dijkstraGraph := AIDijkstra new.
-	dijkstraGraph nodes: nodes.
-	dijkstraGraph
-		edges: edges
-		from: #first
-		to: #second
-		weight: #third.
-
-	"run calculation"
-	dijkstraGraph runFrom: goalTunnel exits asArray anyOne.
+pathFinder := CmPathfinder tunnels: tunnels.
 ]
 
 { #category : #testing }
@@ -174,20 +142,6 @@ CmBoard >> miceWithState: aMouseState [
 ^ mice sum: [ :mouse | (mouse state = aMouseState) ifTrue: [ 1 ] ifFalse: [ 0 ] ]
 ]
 
-{ #category : #'mouse-path' }
-CmBoard >> nextExit: anExit [
-"returns a mouse should run to"
-"anExit is the current exit of the mouse"
-| path |
-
-dijkstraGraph end: anExit.
-
-path := dijkstraGraph reconstructPath.
- 
-"since the first and the last one are from and to, we want the pre last one"
- ^ path size = 1 ifTrue: [ path last ] ifFalse: [ path at: path size - 1 ]
-]
-
 { #category : #'game-logic' }
 CmBoard >> start [
 
@@ -195,6 +149,9 @@ isRunning := true.
 [ 
 	| frameCount lastFPSCalculationTime atLimit|
 	(Delay forMilliseconds: CmSettings startupDelay) wait.
+	
+	"start first path calculation"
+	pathFinder rerun.
 	
 	frameCount := 0.
 	lastFPSCalculationTime := Time millisecondClockValue.
@@ -240,11 +197,6 @@ isRunning := false
 { #category : #'game-logic' }
 CmBoard >> tick [
 "executes all updates for a tick"
-
-"update mouse running paths"
-(tickCount % CmSettings findPathEveryXTicks = 0) ifTrue: [ 
-	self initializeMouseRunningPaths. 
-	].
 
 "update cat"
 cat update.

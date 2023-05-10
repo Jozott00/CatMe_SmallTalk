@@ -139,6 +139,8 @@ reachedTarget ifTrue: [
 		| oldTarget |
 		targetExit isGoal ifTrue: [ 
 			self state: CmMouseState reachedGoal.
+			"trigger callback to trigger have seen"
+			nextTargetClb value: targetExit.
 			self inTunnel: true.
 		] ifFalse: [ 
 		
