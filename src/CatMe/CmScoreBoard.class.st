@@ -2,6 +2,9 @@ Class {
 	#name : #CmScoreBoard,
 	#superclass : #BlElement,
 	#instVars : [
+		'miceLeft',
+		'miceAtGoal',
+		'miceCaught',
 		'miceLeftElem',
 		'miceAtGoalElem',
 		'miceCaughtElem'
@@ -14,8 +17,12 @@ CmScoreBoard >> initialize [
 
 super initialize.
 
+miceLeft := '...'.
+miceAtGoal := '...'.
+miceCaught := '...'.
+
 self initializeAppearance.
-self initializeMiceElements.
+self updateElements.
 ]
 
 { #category : #initialization }
@@ -40,41 +47,53 @@ self border: border.
 self background: Color white.
 ]
 
-{ #category : #initialization }
-CmScoreBoard >> initializeMiceElements [
-
-miceLeftElem := BlTextElement new
-			text: 'Mice Left: ...' asRopedText;
-			position: 10@10;
-			defaultFontSize: 20.
-			
-miceAtGoalElem := BlTextElement new
-			text: 'Mice at Goal: ...' asRopedText;
-			position: 10@30;
-			defaultFontSize: 20.
-			
-miceCaughtElem := BlTextElement new
-			text: 'Mice Caught: ...' asRopedText;
-			position: 10@50;
-			defaultFontSize: 20.
-			
-self addChildren: { miceLeftElem . miceAtGoalElem . miceCaughtElem }.
-
-]
-
 { #category : #update }
 CmScoreBoard >> miceAtGoal: aNumber [
-miceAtGoalElem text: ('Mice at Goal: ', aNumber asString) asRopedText.
+
+(miceAtGoal = aNumber) ifTrue: [ ^ nil ].
+
+miceAtGoal := aNumber.
+self updateElements.
 ]
 
 { #category : #update }
 CmScoreBoard >> miceCaught: aNumber [
 
-miceCaughtElem text: ('Mice Caught: ', aNumber asString) asRopedText
+(miceCaught = aNumber) ifTrue: [ ^ nil ].
+
+miceCaught := aNumber.
+self updateElements.
 ]
 
 { #category : #update }
 CmScoreBoard >> miceLeft: aNumber [
 
-miceLeftElem text: ('Mice Left: ', aNumber asString) asRopedText.
+(miceLeft = aNumber) ifTrue: [ ^ nil ].
+
+miceLeft := aNumber.
+self updateElements.
+]
+
+{ #category : #initialization }
+CmScoreBoard >> updateElements [
+
+self removeChildren.
+
+miceLeftElem := BlTextElement new
+			text: ('Mice Left: ', miceLeft asString) asRopedText;
+			position: 10@10;
+			defaultFontSize: 20.
+			
+miceAtGoalElem := BlTextElement new
+			text: ('Mice at Goal: ', miceAtGoal asString) asRopedText;
+			position: 10@30;
+			defaultFontSize: 20.
+			
+miceCaughtElem := BlTextElement new
+			text: ('Mice Caught: ', miceCaught asString) asRopedText;
+			position: 10@50;
+			defaultFontSize: 20.
+			
+self addChildren: { miceLeftElem . miceAtGoalElem . miceCaughtElem }.
+
 ]

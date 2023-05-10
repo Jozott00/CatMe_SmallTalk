@@ -49,11 +49,31 @@ tickCount := 0.
 tunnels := Set new.
 mice := Set new.
 
-self initializeElementsAndAppearance.
+self initializeAppearance.
+
+self initializeTunnels.
+self initializeMice.
+self initializeCat.
+self initializeScoreboard.
+
 self initializePathfinder.
-"self initializeMouseRunningPaths."
 
 self initializeDebugInfo.
+]
+
+{ #category : #initialization }
+CmBoard >> initializeAppearance [
+
+self size: self class boardLength asPoint.
+
+]
+
+{ #category : #initialization }
+CmBoard >> initializeCat [
+
+"generate cat"
+cat := CmCat new.
+self addChild: cat.
 ]
 
 { #category : #initialization }
@@ -69,20 +89,7 @@ CmSettings debugFPS ifTrue: [
 ]
 
 { #category : #initialization }
-CmBoard >> initializeElementsAndAppearance [
-self size: self class boardLength asPoint.
-
-"generate tunnels"
-1 to: CmSettings tunnelNumber do: [ :nr |
-		| tunnel |
-		tunnel := CmTunnel new.
-		self addChildren: tunnel exits asArray.
-		tunnels add: tunnel.
-	 ].
-
-"set goal tunnel"
-goalTunnel := tunnels asArray first.
-goalTunnel isGoal: true.
+CmBoard >> initializeMice [
 
 1 to: CmSettings miceNumber do: [ :nr |
 		| mouse initTunnel initExit |
@@ -109,10 +116,16 @@ goalTunnel isGoal: true.
 		self addChild: mouse.
 		mice add: mouse.
 	].
+]
 
-"generate cat"
-cat := CmCat new.
-self addChild: cat.
+{ #category : #initialization }
+CmBoard >> initializePathfinder [
+
+pathFinder := CmPathfinder tunnels: tunnels.
+]
+
+{ #category : #initialization }
+CmBoard >> initializeScoreboard [
 
 "scoreboard"
 scoreboardElem := CmScoreBoard new.
@@ -121,9 +134,19 @@ self addChild: scoreboardElem.
 ]
 
 { #category : #initialization }
-CmBoard >> initializePathfinder [
+CmBoard >> initializeTunnels [
 
-pathFinder := CmPathfinder tunnels: tunnels.
+"generate tunnels"
+1 to: CmSettings tunnelNumber do: [ :nr |
+		| tunnel |
+		tunnel := CmTunnel new.
+		self addChildren: tunnel exits asArray.
+		tunnels add: tunnel.
+	 ].
+
+"set goal tunnel"
+goalTunnel := tunnels asArray first.
+goalTunnel isGoal: true.
 ]
 
 { #category : #testing }
