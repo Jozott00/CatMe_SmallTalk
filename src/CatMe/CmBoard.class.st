@@ -5,17 +5,13 @@ Class {
 	#name : #CmBoard,
 	#superclass : #BlElement,
 	#instVars : [
-		'isRunning',
 		'cat',
 		'tunnels',
 		'mice',
-		'goalTunnel',
 		'pathFinder',
-		'lastKnownCatPos',
-		'dijkstraGraph',
-		'tickCount',
 		'fpsElement',
-		'scoreboardElem'
+		'scoreboardElem',
+		'tickCount'
 	],
 	#category : #CatMe
 }
@@ -95,7 +91,7 @@ CmBoard >> initializeMice [
 		| mouse initTunnel initExit |
 		mouse := CmMouse new.
 		
-		initTunnel := (tunnels select: [ :t | t ~= goalTunnel ]) asArray atRandom.
+		initTunnel := (tunnels select: [ :t | t isGoal not ]) asArray atRandom.
 		initExit := initTunnel exits asArray atRandom.
 		mouse pos: initExit pos.
 		mouse initialExit: initExit.
@@ -122,6 +118,9 @@ CmBoard >> initializeMice [
 CmBoard >> initializePathfinder [
 
 pathFinder := CmPathfinder tunnels: tunnels.
+
+"initial pathfinding"
+pathFinder rerun.
 ]
 
 { #category : #initialization }
@@ -145,8 +144,7 @@ CmBoard >> initializeTunnels [
 	 ].
 
 "set goal tunnel"
-goalTunnel := tunnels asArray first.
-goalTunnel isGoal: true.
+tunnels asArray first isGoal: true.
 ]
 
 { #category : #testing }
@@ -165,60 +163,13 @@ CmBoard >> miceWithState: aMouseState [
 ^ mice sum: [ :mouse | (mouse state = aMouseState) ifTrue: [ 1 ] ifFalse: [ 0 ] ]
 ]
 
-{ #category : #'game-logic' }
-CmBoard >> start [
-
-isRunning := true.
-[ 
-	| frameCount lastFPSCalculationTime atLimit|
-	(Delay forMilliseconds: CmSettings startupDelay) wait.
-	
-	"start first path calculation"
-	pathFinder rerun.
-	
-	frameCount := 0.
-	lastFPSCalculationTime := Time millisecondClockValue.
-	atLimit := false.
-	
-	[ isRunning  ] whileTrue: [ 
-		| startTime currentTime elapsedTime |
-		startTime := Time millisecondClockValue.
-	
-		self tick.
-		
-		frameCount := frameCount + 1.
-		tickCount := tickCount + 1.
-		currentTime := Time millisecondClockValue.
-		elapsedTime := currentTime - startTime.
-		
-		"Check if a second has passed since the last FPS calculation"
-		(currentTime - lastFPSCalculationTime >= 500) ifTrue: [ 
-			self updateFPS: frameCount * 2 atLimit: atLimit.
-			frameCount := 0.
-			lastFPSCalculationTime := currentTime. 
-			atLimit := false.
-			].
-			
-		"Check elapsedTime was greater than wanted delay"
-		(CmSettings tickDelayMS < elapsedTime ) ifTrue: [ 
-			atLimit := true. 
-			].
-			
-		(Delay forMilliseconds: (CmSettings tickDelayMS - elapsedTime max: 0)) wait.
-	].
-
-	self updateScoreboard.
-	self inform: 'Game round stopped'.
-] fork.
+{ #category : #accessing }
+CmBoard >> tunnels [
+^ tunnels
 ]
 
 { #category : #'game-logic' }
-CmBoard >> stop [
-isRunning := false
-]
-
-{ #category : #'game-logic' }
-CmBoard >> tick [
+CmBoard >> update [
 "executes all updates for a tick"
 
 "update cat"
@@ -237,13 +188,6 @@ self checkMiceCatches.
 	self updateScoreboard. 
 	].
 
-"check if game is finished"
-self isFinishState ifTrue: [ self stop ]
-]
-
-{ #category : #accessing }
-CmBoard >> tunnels [
-^ tunnels
 ]
 
 { #category : #accessing }

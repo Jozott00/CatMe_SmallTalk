@@ -7,6 +7,11 @@ Class {
 	#category : #CatMe
 }
 
+{ #category : #constants }
+CmSettings class >> boardLength [
+^ CmBoard boardLength.
+]
+
 { #category : #'setting - cat' }
 CmSettings class >> catMovePerTick [
 ^ 10.
