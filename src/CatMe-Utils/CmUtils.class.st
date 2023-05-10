@@ -6,14 +6,15 @@ Class {
 
 { #category : #'graph - calculation' }
 CmUtils class >> distanceFromPoint: point toLineSegmentFrom: lineStart to: lineEnd [
-    | lineVector pointVector projection scalar t closestPoint |
+    | lineVector pointVector projection scalar t closestPoint dotProd |
 
     lineVector := lineEnd - lineStart.
     pointVector := point - lineStart.
 
     "Calculate the scalar projection of the point vector onto the line vector"
     scalar := pointVector dotProduct: lineVector.
-    t := scalar / (lineVector dotProduct: lineVector).
+	 dotProd := (lineVector dotProduct: lineVector).
+    t := (dotProd = 0) ifTrue: [ 1 ] ifFalse: [ scalar / dotProd ].
 
     "Clamp t to the [0, 1] range, representing the line segment"
     t := (t max: 0) min: 1.

@@ -3,7 +3,7 @@ Class {
 	#superclass : #CmCharacter,
 	#instVars : [
 		'inTunnel',
-		'atGoal',
+		'state',
 		'targetExit',
 		'delayCounter',
 		'nextTargetClb',
@@ -12,9 +12,34 @@ Class {
 	#category : #'CatMe-Entities'
 }
 
-{ #category : #accessing }
+{ #category : #state }
 CmMouse >> atGoal [
-^ atGoal
+^ state = CmMouseState reachedGoal.
+]
+
+{ #category : #state }
+CmMouse >> caught [
+^ state = CmMouseState caughtByCat.
+]
+
+{ #category : #state }
+CmMouse >> caughtBy: aCat [
+| icon opacityAnimation transformAnimation |
+
+self state: CmMouseState caughtByCat.
+
+icon := CmIcons dead.
+self background: (CmIcons asBlBackground: icon).
+
+opacityAnimation := (BlOpacityAnimation new opacity: 0; duration: 2000 milliSeconds).
+transformAnimation := BlTransformAnimation new.
+transformAnimation transform
+	translateBy: 0@(-50);
+	apply.
+transformAnimation absolute.
+transformAnimation duration: 2000 milliSeconds.
+
+self addAnimation: (BlParallelAnimation withAll: { opacityAnimation . transformAnimation })
 ]
 
 { #category : #'game-logic' }
@@ -25,6 +50,11 @@ delayCounter := delayCounter - 1.
 { #category : #'game-logic' }
 CmMouse >> hides [
 ^ inTunnel
+]
+
+{ #category : #accessing }
+CmMouse >> inGame [ 
+^ state = CmMouseState inGame.
 ]
 
 { #category : #accessing }
@@ -48,7 +78,8 @@ targetExit := anExit
 CmMouse >> initialize [ 
 
 super initialize.
-atGoal := false.
+
+state := CmMouseState inGame.
 delayCounter := CmSettings miceMaxDelayCount atRandom.
 self speed: CmSettings miceMaxSpeed atRandom * CmSettings mouseMovePerTick.
 self inTunnel: true.
@@ -74,6 +105,17 @@ CmMouse >> nextTargetClb: aBlockClosure [
 nextTargetClb := aBlockClosure.
 ]
 
+{ #category : #accessing }
+CmMouse >> state [
+^ state.
+]
+
+{ #category : #state }
+CmMouse >> state: aMouseState [
+
+state := aMouseState.
+]
+
 { #category : #updating }
 CmMouse >> update [
 | reachedTarget |
@@ -83,7 +125,8 @@ super update.
 "decrement delay"
 delayCounter > 0 ifTrue: [ ^ self delayDecrement ].
 
-atGoal ifTrue: [ ^nil ].
+(self atGoal | self caught) ifTrue: [ ^nil ].
+
 
 "move in target direction"
 reachedTarget := self moveTo: (targetExit position) 
@@ -95,7 +138,7 @@ reachedTarget := self moveTo: (targetExit position)
 reachedTarget ifTrue: [ 	
 		| oldTarget |
 		targetExit isGoal ifTrue: [ 
-			atGoal := true.
+			self state: CmMouseState reachedGoal.
 			self inTunnel: true.
 		] ifFalse: [ 
 		

@@ -3,7 +3,8 @@ Class {
 	#superclass : #BlElement,
 	#instVars : [
 		'miceLeftElem',
-		'miceAtGoalElem'
+		'miceAtGoalElem',
+		'miceCaughtElem'
 	],
 	#category : #CatMe
 }
@@ -27,9 +28,15 @@ border := BlBorder builder
 	capRound;
 	build.
 
+self layout: (BlLinearLayout vertical alignTopLeft; cellSpacing: 5).
+self constraintsDo: [ :c |
+		c horizontal fitContent.
+		c vertical fitContent
+	 ].
+self padding: (BlInsets all: 20).
+self clipChildren: false.
 self border: border.
-self position: CmBoard boardLength asPoint - (200@100).
-self size: 200@100.
+"self position: CmBoard boardLength asPoint."
 self background: Color white.
 ]
 
@@ -46,13 +53,24 @@ miceAtGoalElem := BlTextElement new
 			position: 10@30;
 			defaultFontSize: 20.
 			
-self addChildren: { miceLeftElem . miceAtGoalElem }.
+miceCaughtElem := BlTextElement new
+			text: 'Mice Caught: ...' asRopedText;
+			position: 10@50;
+			defaultFontSize: 20.
+			
+self addChildren: { miceLeftElem . miceAtGoalElem . miceCaughtElem }.
 
 ]
 
 { #category : #update }
 CmScoreBoard >> miceAtGoal: aNumber [
 miceAtGoalElem text: ('Mice at Goal: ', aNumber asString) asRopedText.
+]
+
+{ #category : #update }
+CmScoreBoard >> miceCaught: aNumber [
+
+miceCaughtElem text: ('Mice Caught: ', aNumber asString) asRopedText
 ]
 
 { #category : #update }

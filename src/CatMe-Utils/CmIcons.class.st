@@ -23,6 +23,11 @@ CmIcons class >> cat [
 ^ self loadIcon: 'cat.png'
 ]
 
+{ #category : #icons }
+CmIcons class >> dead [
+^ self loadIcon: 'dead.png'
+]
+
 { #category : #utilities }
 CmIcons class >> loadIcon: aString [
 "loads image from resources directory of CatMe_SmallTalk repository"

@@ -22,6 +22,20 @@ CmCharacter class >> position: aPosition [
 	
 ]
 
+{ #category : #collision }
+CmCharacter >> collidesWith: aCharacter [
+    | pos1 pos2 size1 size2 |
+    pos1 := self pos.
+    pos2 := aCharacter pos.
+    size1 := self size.
+    size2 := aCharacter size.
+    
+    ^ (pos1 x < (pos2 x + size2 x)) 
+        & ((pos1 x + size1 x) > pos2 x) 
+        & (pos1 y < (pos2 y + size2 y))
+        & ((pos1 y + size1 y) > pos2 y)
+]
+
 { #category : #accessing }
 CmCharacter >> moveBy: aPoint [
 

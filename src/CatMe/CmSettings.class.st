@@ -72,7 +72,7 @@ CmSettings class >> miceNumber [
 
 { #category : #'setting - mice' }
 CmSettings class >> miceTrace [
-^false
+^ false
 ]
 
 { #category : #'setting - mice' }

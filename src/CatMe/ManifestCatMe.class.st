@@ -8,6 +8,13 @@ Class {
 }
 
 { #category : #'code-critics' }
+ManifestCatMe class >> ruleBadMessageRule2V1FalsePositive [
+
+	<ignoreForCoverage>
+	^ #(#(#(#RGMethodDefinition #(#CmBoard #miceWithState: #false)) #'2023-05-10T12:40:21.15489+02:00') )
+]
+
+{ #category : #'code-critics' }
 ManifestCatMe class >> ruleGuardingClauseRuleV1FalsePositive [
 
 	<ignoreForCoverage>

@@ -23,6 +23,15 @@ CmBoard class >> boardLength [
 ^1000
 ]
 
+{ #category : #'update cycle' }
+CmBoard >> checkMiceCatches [
+
+mice 	select: [ :mouse | mouse hides not & mouse inGame & (cat collidesWith: mouse) ] 
+		thenDo: [ :mouse |
+			mouse caughtBy: cat.
+	 	]
+]
+
 { #category : #accessing }
 CmBoard >> dijkstra [
 ^ dijkstraGraph.
@@ -50,10 +59,10 @@ CmBoard >> initializeDebugInfo [
 CmSettings debugFPS ifTrue: [ 
 		fpsElement := BlTextElement new
 			text: 'FPS: ...' asRopedText;
-			position: 10@10;
+			position: (CmBoard boardLength - 100)@10;
 			defaultFontSize: 20.
 		self addChild: fpsElement.
-	 ]
+	]
 ]
 
 { #category : #initialization }
@@ -155,13 +164,14 @@ CmBoard >> isFinishState [
 
 result := true.
 ^ mice allSatisfy: [ :mouse |
-	mouse atGoal
+	mouse inGame not.
 	].
 ]
 
 { #category : #accessing }
-CmBoard >> miceAtGoal [
-^ mice sum: [ :mouse | mouse atGoal ifTrue: [ 1 ] ifFalse: [ 0 ] ]
+CmBoard >> miceWithState: aMouseState [
+"sums that mice with a given CmMouseState"
+^ mice sum: [ :mouse | (mouse state = aMouseState) ifTrue: [ 1 ] ifFalse: [ 0 ] ]
 ]
 
 { #category : #'mouse-path' }
@@ -231,21 +241,28 @@ isRunning := false
 CmBoard >> tick [
 "executes all updates for a tick"
 
+"update mouse running paths"
 (tickCount % CmSettings findPathEveryXTicks = 0) ifTrue: [ 
 	self initializeMouseRunningPaths. 
 	].
 
+"update cat"
 cat update.
 
+"udpate mice"
 mice do: [ :mouse |
 		mouse update.
 	].
 
+"check mice catches"
+self checkMiceCatches.
 
+"update scoreboard"
 (tickCount % CmSettings findPathEveryXTicks = 0) ifTrue: [ 
 	self updateScoreboard. 
 	].
 
+"check if game is finished"
 self isFinishState ifTrue: [ self stop ]
 ]
 
@@ -267,11 +284,15 @@ aBoolean ifTrue: [ fpsElement border: border. ] ifFalse: [ fpsElement border: ni
 
 { #category : #'update cycle' }
 CmBoard >> updateScoreboard [
-| miceAtGoal |
+| miceAtGoal miceLeft miceCaught |
 
-miceAtGoal := self miceAtGoal.
+miceAtGoal := self miceWithState: CmMouseState reachedGoal.
+miceCaught := self miceWithState: CmMouseState caughtByCat.
+miceLeft := CmSettings miceNumber - miceAtGoal - miceCaught.
+
 scoreboardElem miceAtGoal: miceAtGoal.
-scoreboardElem miceLeft: CmSettings miceNumber - miceAtGoal.
+scoreboardElem miceCaught: miceCaught.
+scoreboardElem miceLeft: miceLeft.
 
 
 ]
