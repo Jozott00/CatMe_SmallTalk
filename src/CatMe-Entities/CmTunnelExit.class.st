@@ -7,6 +7,15 @@ Class {
 	#category : #'CatMe-Entities'
 }
 
+{ #category : #accessing }
+CmTunnelExit class >> position: aPoint tunnel: aTunnel [
+| obj |
+obj := self new.
+obj pos: aPoint.
+obj tunnel: aTunnel.
+^ obj.
+]
+
 { #category : #initialization }
 CmTunnelExit >> initialize [
 	| icon len |
@@ -16,7 +25,7 @@ CmTunnelExit >> initialize [
 	len := 50.
 	self size: len@len.
 	
-	self pos: CmUtils randomBoardPosition.
+	"self pos: CmUtils randomBoardPosition."
 ]
 
 { #category : #accessing }

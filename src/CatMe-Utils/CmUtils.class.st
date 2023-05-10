@@ -4,29 +4,6 @@ Class {
 	#category : #'CatMe-Utils'
 }
 
-{ #category : #'as yet unclassified' }
-CmUtils class >> distanceFromPoint: point toLineSegmentFrom: lineStart to: lineEnd [
-    | lineVector pointVector projection scalar t closestPoint dotProd |
-
-    lineVector := lineEnd - lineStart.
-    pointVector := point - lineStart.
-
-    "Calculate the scalar projection of the point vector onto the line vector"
-    scalar := pointVector dotProduct: lineVector.
-	 dotProd := (lineVector dotProduct: lineVector).
-    t := (dotProd = 0) ifTrue: [ 1 ] ifFalse: [ scalar / dotProd ].
-
-    "Clamp t to the [0, 1] range, representing the line segment"
-    t := (t max: 0) min: 1.
-
-    "Find the closest point on the line segment"
-    closestPoint := lineStart + (lineVector * t).
-
-    "Calculate the distance from the point to the closest point on the line segment"
-    ^ point distanceTo: closestPoint
-
-]
-
 { #category : #random }
 CmUtils class >> randomBoardPosition [
 	| randomX randomY |
@@ -37,18 +14,32 @@ CmUtils class >> randomBoardPosition [
 	^ randomX@randomY
 ]
 
-{ #category : #'graph - calculation' }
-CmUtils class >> weightForEdgeFrom: exitPoint1 to: exitPoint2 catPosition: playerPoint [
-    | distance exitPointsDistance playerEdgeDistance |
+{ #category : #random }
+CmUtils class >> randomBoardPositionCount: aCountNumber spacing: aSpacingNumber [
+"Generates aCountNumber Points with `self randomBoardPosition`,
+where each position got a spacing between all other of atleast aSpacingNumber"
+    | positions position |
+    positions := OrderedCollection new.
 
-    "Calculate the distance between the two exit points"
-    exitPointsDistance := exitPoint1 distanceTo: exitPoint2.
+    aCountNumber timesRepeat: [
+        [ position := self randomBoardPosition.
+        (positions anySatisfy: [ :p | (p distanceTo: position) < aSpacingNumber ]) ] whileTrue.
+        positions add: position ].
 
-    "Calculate the distance from the player to the edge"
-    playerEdgeDistance := self distanceFromPoint: playerPoint toLineSegmentFrom: exitPoint1 to: exitPoint2.
+    ^ positions
+]
 
-    "Calculate the weight based on the exit points distance and the player's distance to the edge"
-    distance := exitPointsDistance * (1 / playerEdgeDistance).
+{ #category : #random }
+CmUtils class >> randomExitPositions: aCountNumber notIn: aSet spacing: aSpacingNumber [
+ | positions position |
+ positions := OrderedCollection new.
 
-    ^ distance
+ aCountNumber timesRepeat: [
+      [position := self randomBoardPosition.
+      		(aSet anySatisfy: [ :p | (p distanceTo: position) < aSpacingNumber ]) ] whileTrue.
+      positions add: position. 
+		aSet add: position 
+		].
+
+  ^ positions
 ]

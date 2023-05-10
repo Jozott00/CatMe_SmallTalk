@@ -8,6 +8,14 @@ Class {
 	#category : #'CatMe-Entities'
 }
 
+{ #category : #initalize }
+CmTunnel class >> exitPositionGenerator: aBlockClosure [
+| obj |
+obj := self new.
+obj initializeExitsWith: aBlockClosure.
+^ obj.
+]
+
 { #category : #accessing }
 CmTunnel >> exits [
 ^ exits
@@ -15,22 +23,28 @@ CmTunnel >> exits [
 
 { #category : #initialization }
 CmTunnel >> initialize [
-| numberOfExits |
-
 isGoal := false.
 exits := Set new.
 
 
+]
+
+{ #category : #initialization }
+CmTunnel >> initializeExitsWith: aBlockClosure [
+"aBlockClosure can be called to get a new position for an exit"
+| numberOfExits exitPositions |
+
 numberOfExits := 2 + (Random new nextInteger: ((CmSettings maxTunnelEntries) - 2)).
-1 to: numberOfExits do: [ :nr |
-	| e |
-	e := CmTunnelExit new.
-	e tunnel: self.
-	exits add: e. 
-	].
+exitPositions := aBlockClosure value: numberOfExits.
+
+"create exit positions"
+exits addAll: (exitPositions collect: [ :pos |
+	CmTunnelExit 
+			position: pos
+			tunnel: self. 
+	]).
 
 self updateAppearance.
-
 ]
 
 { #category : #accessing }

@@ -36,6 +36,11 @@ mice 	select: [ :mouse | mouse hides not & mouse inGame & (cat collidesWith: mou
 	 	]
 ]
 
+{ #category : #accessing }
+CmBoard >> exits [ 
+^ tunnels flatCollect: [ :t | t exits ]
+]
+
 { #category : #initialization }
 CmBoard >> initialize [ 
 
@@ -138,7 +143,11 @@ CmBoard >> initializeTunnels [
 "generate tunnels"
 1 to: CmSettings tunnelNumber do: [ :nr |
 		| tunnel |
-		tunnel := CmTunnel new.
+		tunnel := CmTunnel exitPositionGenerator: [ :numberOfExits |
+			| exitPositions |
+			exitPositions := self exits collect: [ :e | e pos ].
+			CmUtils randomExitPositions: numberOfExits notIn: exitPositions spacing: 100. 
+			].
 		self addChildren: tunnel exits asArray.
 		tunnels add: tunnel.
 	 ].
