@@ -29,9 +29,8 @@ self updateElements.
 CmScoreBoard >> initializeAppearance [ 
 | border |
 
-border := BlBorder builder
+border := BlBorder builder 
 	paint: Color black;
-	width: 2;
 	capRound;
 	build.
 

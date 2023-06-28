@@ -48,6 +48,23 @@ window addEventHandlerOn: BlSpaceClosedEvent
 	do: [ self inform: 'Space closed'. self stop. ].
 ]
 
+{ #category : #'as yet unclassified' }
+CatMeGame >> showEndScreen [
+| endscreen |
+
+endscreen := CmEndScreen withCloseCallback: [
+		window close.
+	].
+
+window root removeChildren.
+
+window root 
+	addChild: endscreen.
+	
+
+	
+]
+
 { #category : #'game - logic' }
 CatMeGame >> start [
 | board |
@@ -59,42 +76,27 @@ isRunning := true.
 window show.
 
 [ 
-	| frameCount lastFPSCalculationTime atLimit|
+	| fpsCounter|
 	(Delay forMilliseconds: CmSettings startupDelay) wait.
 	
-	frameCount := 0.
-	lastFPSCalculationTime := Time millisecondClockValue.
-	atLimit := false.
+	fpsCounter := FpsCounter withFpsUpdateCallback: [:fcount :atlimit | board updateFPS: fcount atLimit: atlimit ]. 
 	
 	[ isRunning  ] whileTrue: [ 
-		| startTime currentTime elapsedTime |
-		startTime := Time millisecondClockValue.
+		| elapsedTime |
 	
-		self tick: board.
-		
-		frameCount := frameCount + 1.
-		currentTime := Time millisecondClockValue.
-		elapsedTime := currentTime - startTime.
-		
-		"Check if a second has passed since the last FPS calculation"
-		(currentTime - lastFPSCalculationTime >= 500) ifTrue: [ 
-			board updateFPS: frameCount * 2 atLimit: atLimit.
-			frameCount := 0.
-			lastFPSCalculationTime := currentTime. 
-			atLimit := false.
-			].
-			
-		"Check elapsedTime was greater than wanted delay"
-		(CmSettings tickDelayMS < elapsedTime ) ifTrue: [ 
-			atLimit := true. 
-			].
+		elapsedTime := fpsCounter measure: [ 
+			self tick: board.
+		].
 			
 		(Delay forMilliseconds: (CmSettings tickDelayMS - elapsedTime max: 0)) wait.
 	].
 
 	board updateScoreboard.
+	self showEndScreen.
 	self inform: 'Game round stopped'.
-	window close.
+	"window close."
+	
+	
 ] fork.
 ]
 

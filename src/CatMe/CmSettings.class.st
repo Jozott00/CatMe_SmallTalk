@@ -14,7 +14,7 @@ CmSettings class >> boardLength [
 
 { #category : #'setting - cat' }
 CmSettings class >> catMovePerTick [
-^ 10.
+^ CmSettings tickDelayMS.
 ]
 
 { #category : #debug }
@@ -67,7 +67,7 @@ CmSettings class >> miceMaxDelayMS [
 
 { #category : #'setting - mice' }
 CmSettings class >> miceMaxSpeed [
-^ 3
+^ (CmSettings tickDelayMS / 5) truncated.
 ]
 
 { #category : #'setting - mice' }
